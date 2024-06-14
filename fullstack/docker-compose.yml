@@ -1,0 +1,77 @@
+version: "3.8"
+
+services:
+  backend:
+    image: backend
+    container_name: backend_dev
+    build: ./backend
+    volumes:
+      - backend_dev:/app
+      - /app/node_modules # prevent node_modules from being overwritten
+    restart: always
+    ports:
+      - 3000:3000
+    environment:
+      - MONGO_URL=mongodb://$DB_USER:$DB_PWD@mongodb:27017
+      # - JWT_SECRET=$JWT_SECRET
+
+  frontend:
+    image: frontend
+    container_name: frontend_dev
+    build: ./frontend
+    volumes:
+      - frontend_dev:/app
+      - /app/node_modules # prevent node_modules from being overwritten
+    restart: always
+    ports:
+      - 5173:5173
+    # environment:
+    #   - REACT_APP_API_URL=http://localhost:5000
+
+  mongodb:
+    image: mongo
+    container_name: mongo_dev
+    restart: always
+    expose:
+      - 27017
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: $DB_USER
+      MONGO_INITDB_ROOT_PASSWORD: $DB_PWD
+      MONOG_INITDB_DATABASE: qeeps
+    volumes:
+      - db_data:/data/db
+
+  mongo-express:
+    image: mongo-express
+    container_name: mongo-express_dev
+    restart: always
+    depends_on:
+      - mongodb
+    ports:
+      - 8081:8081
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: $DB_USER
+      ME_CONFIG_MONGODB_ADMINPASSWORD: $DB_PWD
+      ME_CONFIG_MONGODB_SERVER: mongodb
+      # setup default explorer user
+      ME_CONFIG_BASICAUTH_USERNAME: $EXPLORER_USER
+      ME_CONFIG_BASICAUTH_PASSWORD: $EXPLORER_PWD
+
+volumes:
+  db_data:
+    name: db_data
+    driver: local
+  backend_dev:
+    name: backend_dev
+    driver: local
+    driver_opts:
+      type: none
+      device: ./backend
+      o: bind
+  frontend_dev:
+    name: frontend_dev
+    driver: local
+    driver_opts:
+      type: none
+      device: ./frontend
+      o: bind

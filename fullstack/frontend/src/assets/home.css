@@ -1,0 +1,18 @@
+.main-font {
+    font-family: "Poppins", sans-serif;
+}
+
+.main-color {
+    color: #164951;
+}
+
+.connexion-btn {
+    position: absolute;
+    width: 361px;
+    height: 52px;
+    background: #164951;
+    color: white;
+    border-radius: 14px;
+    font-family: "Poppins", sans-serif;
+}
+
