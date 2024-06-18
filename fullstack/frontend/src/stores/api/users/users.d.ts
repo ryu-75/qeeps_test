@@ -2,15 +2,24 @@
 
 export type UserBase = {
   _id: string;
-  email: string;
-  // TIPS: add more fields here
-  // ...
+  first_name?: string;
+  last_name?: string;
+  status: string;
+  phone?: string;
+  email?: string;
   createdAt: Date;
   updatedAt: Date;
 };
 
+export type OtpBase = {
+  email: string;
+  otp: string;
+  createdAt: Date;
+}
+
 export type UserBasePatch = Partial<UserBase>;
 
 export interface UserResponse {
-  data: Omit<UserBase, "password">; // TIPS: remove password field if backend sends it
+  data: Omit<UserBase, "_id," | "createdAt" | "updatedAt">; // TIPS: remove password field if backend sends it
+  error: FetchBaseQueryError | SerializedError;
 }
