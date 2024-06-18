@@ -1,3 +1,4 @@
 import { UserController } from "./userController";
+import { OtpController } from "../controllers/otpController";
 
-export { UserController };
+export { UserController, OtpController };
