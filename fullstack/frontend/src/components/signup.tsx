@@ -56,6 +56,7 @@ class Signup extends Component<SignupProps, SignupState> {
       email: email,
       phone: phone,
     };
+    
     try {
       const response = await fetch(`http://localhost:3000/users`, {
         method: 'PATCH',
