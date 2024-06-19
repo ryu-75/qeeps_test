@@ -50,7 +50,7 @@ class Home extends Component<HomeProps, HomeState> {
     };
 
     try {
-      const response = await fetch(`http://localhost:3000/users/${redirection}`, {
+      const response = await fetch(`http://localhost:3000/users`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

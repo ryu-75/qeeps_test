@@ -2,34 +2,29 @@ import { AbsoluteCenter, Box, Button, Card, CardBody, Center, FormControl, FormH
 import React, { Component, ReactNode } from "react";
 
 interface EmailFormProps {
-    onSubmit: (email: string) => Promise<void>;
-  }
+  onSubmit: (email: string) => Promise<void>;
+  error: string;
+}
   
-  interface EmailFormState {
-    email: string;
-    error: string;
-  }
+interface EmailFormState {
+  email: string;
+}
 
 class EmailInput extends Component<EmailFormProps, EmailFormState> {
     constructor(props: EmailFormProps) {
       super(props);
       this.state = {
         email: "",
-        error: "",
       };
     }
   
     handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-      this.setState({ email: event.target.value, error: "" });
+      this.setState({ email: event.target.value });
     };
   
-    // validateEmail = (email: string) => {
-    //   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i;
-    //   return emailRegex.test(email);
-    // };
-  
     render(): ReactNode {
-        const { email, error } = this.state;
+        const { email } = this.state;
+        const { error } = this.props;
         return (
             <Grid
               templateAreas={`"header header"
@@ -130,7 +125,7 @@ class EmailInput extends Component<EmailFormProps, EmailFormState> {
                                   pl={12}
                                 />
                               </InputGroup>
-                              { (error || !email) && (
+                              { (error.length > 0 || !email) && (
                                 <FormHelperText
                                   sx={{
                                     fontWeight: 400,

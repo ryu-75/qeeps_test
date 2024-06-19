@@ -8,6 +8,7 @@ interface EmailRegisterState {
   email: string;
   code: string[];
   otp: string;
+  error: string;
 }
 
 class EmailRegister extends Component<{}, EmailRegisterState> {
@@ -17,7 +18,8 @@ class EmailRegister extends Component<{}, EmailRegisterState> {
       submitted: false,
       email: "",
       code: Array(5).fill(''),
-      otp: ""
+      otp: "",
+      error: ""
     };
   }
 
@@ -27,13 +29,15 @@ class EmailRegister extends Component<{}, EmailRegisterState> {
   };
   
   handleSubmit = async (email: string) => {
+    if (!this.validateEmail(email)) {
+      this.setState({ error: "Veuillez entrer une adresse e-mail valide." });
+      throw new Error("Veuillez entrer une adresse e-mail valide.");
+    }
+
     try {
-      this.setState({ submitted: true, email });
       const { code } = this.state;
 
-      if (!this.validateEmail(email)) {
-        throw new Error("Veuillez entrer une adresse e-mail valide.");
-      }
+      this.setState({ submitted: true, email });
 
       const response = await fetch('http://localhost:3000/otp/send-otp', {
         method: 'POST',
@@ -57,17 +61,13 @@ class EmailRegister extends Component<{}, EmailRegisterState> {
       alert("Failed to send OTP. Please try again.");
     }
   };
-  
 
-  handleResendCode = () => {
-    this.setState({ submitted: false })
-  }
   render(): ReactNode {
-    const { submitted, email, code, otp } = this.state;
+    const { submitted, email, code, otp, error } = this.state;
     return (
       <div>
         {!submitted ? (
-          <EmailInput onSubmit={this.handleSubmit} />
+          <EmailInput onSubmit={this.handleSubmit} error={error} />
         ) : (
           <OtpInput refetchOtp={this.handleSubmit} email={email} code={code} otp={otp} />
         )}

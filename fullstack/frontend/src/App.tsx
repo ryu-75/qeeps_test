@@ -5,6 +5,7 @@ import Home from "./pages/Home";
 import RegisterWrapper from "./pages/Register";
 import EmailRegister from "./pages/EmailRegister";
 import { UserBase } from "./stores/api/users/users";
+import Signup from "./components/signup";
 
 interface AppState {
   data: UserBase[] | null;
