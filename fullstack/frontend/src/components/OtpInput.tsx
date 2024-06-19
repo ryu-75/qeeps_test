@@ -3,58 +3,46 @@ import { AbsoluteCenter, Box, Button, Card, CardBody, Center, FormControl, FormH
 import { TbMailForward } from "react-icons/tb";
 
 interface SecurityCodeInputProps {
-    fetchResendCode: () => void;
+    refetchOtp: (email: string) => Promise<void>;
     email: string;
     code: string[];
+    otp: string;
 }
   
 interface SecurityCodeInputState {
-  code: string[];
+  newCode: string[];
+  isValidCode: boolean;
 }
 
 class OtpInput extends Component<SecurityCodeInputProps, SecurityCodeInputState> {
     constructor(props: SecurityCodeInputProps) {
       super(props);
       this.state = {
-        code: props.code,
+        newCode: Array(5).fill(''),
+        isValidCode: false,
       }
     }
   
+  compareCodeContent = (newCode: string[], otp: string): boolean => {
+    let yourOtp = "";
+
+    for (let i = 0; i < newCode.length; i++) yourOtp += newCode[i]; 
+    if (yourOtp === otp) return true;
+    alert('Code is not valid');
+    return false;
+  }
+
   handleChange = (index: number) => (event: ChangeEvent<HTMLInputElement>) => {
-    const newCode = [...this.state.code];
-    newCode[index] = event.target.value;
-    this.setState({ code: newCode });
-    console.log(newCode);
-  };
-
-  handleContinue = async () => {
-    const { code } = this.state;
-    const { email } = this.props;
-
-    try {
-      const response = await fetch('http://localhost:3000/otp/send-otp', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, otp: code.join('') }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to send OTP');
-      }
-
-      alert('OTP sent succesfully');
-    } catch (e: any) {
-      console.error("Error sending OTP: ", e.message);
-      alert("Failed to send OTP. Please try again.");
-    }
+    const { value } = event.target;
+    const { newCode } = this.state;
+    const isNewCode = [...newCode];
+    isNewCode[index] = value;
+    this.setState({ newCode: isNewCode });
   };
 
   render(): ReactNode {
-    const { code } = this.state;
-
+    const { isValidCode, newCode } = this.state;
+    const { email, refetchOtp, code, otp } = this.props;
     return (
       <Grid
         templateAreas={`"header header"
@@ -125,7 +113,7 @@ class OtpInput extends Component<SecurityCodeInputProps, SecurityCodeInputState>
                             </Text>
                             <Spacer marginTop={2} />
                             <HStack spacing={2}>
-                              {code.map((digit, index) => (
+                              {newCode.map((digit, index) => (
                                 <Input
                                   key={index}
                                   value={digit}
@@ -135,10 +123,10 @@ class OtpInput extends Component<SecurityCodeInputProps, SecurityCodeInputState>
                                   maxLength={1}
                                   textAlign="center"
                                   size="md"
-                                  width="38px"
-                                  height="40px"
+                                  width="45px"
+                                  height="45px"
                                   borderRadius={"14px"}
-                                  fontSize="xl"
+                                  fontSize="10px"
                                 />
                               ))}
                             </HStack>
@@ -171,14 +159,16 @@ class OtpInput extends Component<SecurityCodeInputProps, SecurityCodeInputState>
                                     width:"203px",
                                     height:"40px"
                                 }}
-                                onClick={this.handleContinue}
+                                onClick={() => {
+                                  refetchOtp(email);
+                                }}
                             >
                                 Je n’ai rien reçu
                                 <Icon
-                                    as={TbMailForward} // Utilisation de TbMailForward comme composant IconButton
+                                    as={TbMailForward}
                                     boxSize={4}
                                     ml={2}
-                                    aria-label="Forward email" // Accessibilité
+                                    aria-label="Forward email" 
                                 />
                             </Button>
                         </VStack>
@@ -195,9 +185,13 @@ class OtpInput extends Component<SecurityCodeInputProps, SecurityCodeInputState>
                 width={"361px"}
                 height={"52px"}
                 color="white"
-                backgroundColor={"#164951"}
+                backgroundColor="#164951"
                 borderRadius="14px"
                 fontFamily="'Poppins', sans-serif"
+                disabled={!code}
+                onClick={() => {
+                  this.compareCodeContent(newCode, otp);
+                }}
               >
                 Continuer
               </Button>

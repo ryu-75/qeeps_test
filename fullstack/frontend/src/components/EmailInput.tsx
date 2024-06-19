@@ -2,8 +2,7 @@ import { AbsoluteCenter, Box, Button, Card, CardBody, Center, FormControl, FormH
 import React, { Component, ReactNode } from "react";
 
 interface EmailFormProps {
-    onSubmit: (email: string) => void;
-    code: string[];
+    onSubmit: (email: string) => Promise<void>;
   }
   
   interface EmailFormState {
@@ -24,40 +23,11 @@ class EmailInput extends Component<EmailFormProps, EmailFormState> {
       this.setState({ email: event.target.value, error: "" });
     };
   
-    validateEmail = (email: string) => {
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i;
-      return emailRegex.test(email);
-    };
+    // validateEmail = (email: string) => {
+    //   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i;
+    //   return emailRegex.test(email);
+    // };
   
-    handleSubmit = async () => {
-      const { email } = this.state;
-      const { code } = this.props;
-       
-      try {
-        if (this.validateEmail(email)) {
-          this.props.onSubmit(email);
-          const response = await fetch('http://localhost:3000/otp/send-otp', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ email, otp: code.join('') }),
-          });
-    
-          if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.message || 'Failed to send OTP');
-          }
-    
-          alert('OTP sent succesfully');
-        } else {
-          this.setState({ error: "Veuillez entrer une adresse e-mail valide." });
-        }
-      } catch (e: any) {
-        console.error("Error sending OTP: ", e.message);
-        alert("Failed to send OTP. Please try again.");
-      }
-    };
     render(): ReactNode {
         const { email, error } = this.state;
         return (
@@ -190,7 +160,9 @@ class EmailInput extends Component<EmailFormProps, EmailFormState> {
                       backgroundColor={!email ? "rgba(22, 73, 81, 0.3)" : "#164951"}
                       borderRadius="14px"
                       fontFamily="'Poppins', sans-serif"
-                      onClick={this.handleSubmit}
+                      onClick={() => {
+                        this.props.onSubmit(email);
+                      }}
                       disabled={!email}
                     >
                       Continuer
