@@ -20,8 +20,24 @@ export class UserService {
     try {
       const newUser = new this.model({ first_name, last_name, phone, email, status });
       const savedUser = await newUser.save();
-      console.log(savedUser);
       return savedUser;
+    } catch (err) {
+      throw new Error(`Failed to create user: ${err}`);
+    }
+  }
+
+  async updateUser(_id : string, updateData: { first_name: string, last_name: string, phone: string, email: string }) {
+    try {
+      const updateUser = await this.model.findById(_id, updateData, {
+        new: true,
+        runValidators: true,
+      });
+
+      if (!updateUser) {
+        throw new Error("User not found");
+      }
+
+      return updateUser;
     } catch (err) {
       throw new Error(`Failed to create user: ${err}`);
     }

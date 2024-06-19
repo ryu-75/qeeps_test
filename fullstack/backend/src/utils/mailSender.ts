@@ -3,13 +3,12 @@ const nodemailer = require('nodemailer');
 const mailSender = async (email: string, title: string, body: string): Promise<void> => {
     try {
         let transporter = nodemailer.createTransporter({
-            host: 'smtp.gmail.com',
-            port: 465,
-            secure: true,
-            auth: {
-                user: 'sasha.lorion@gmail.com',
-                pass: 'uryuU94800@_',
-            },
+            host: 'localhost',
+            port: 25,
+            secure: false,
+            tls: {
+                rejectUnauthorized: false
+            }
         });
         let info = await transporter.sendMail({
             from: 'www.sandeepdev.me - Sandeep Singh',

@@ -8,12 +8,6 @@ export class OtpController {
         const { email }: { email: string } = req.body;
 
         const existingOpt = await OtpModel.findOne({ email });
-        // if (checkUserPresent) {
-        //     return res.status(401).json({
-        //         success: false,
-        //         message: 'User is already registered',
-        //     });
-        // }
 
         let otp = otpGenerator.generate(5, {
             upperCaseAlphabet: false,
