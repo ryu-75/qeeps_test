@@ -1,6 +1,7 @@
 import { AbsoluteCenter, Box, Button, Card, CardBody, Center, FormControl, FormHelperText, FormLabel, Grid, GridItem, Image, Input, InputGroup, InputLeftElement, Spacer, Stack, Text, VStack } from "@chakra-ui/react";
 import React, { Component, ReactNode } from "react";
 
+/*  */
 interface EmailFormProps {
   onSubmit: (email: string) => Promise<void>;
   error: string;

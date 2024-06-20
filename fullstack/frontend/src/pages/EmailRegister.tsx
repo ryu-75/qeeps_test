@@ -1,8 +1,9 @@
 import { Component, ReactNode } from "react";
 import EmailInput from "../components/EmailInput";
 import OtpInput from "../components/OtpInput";
+import axios from "axios";
 
-
+/* Définition des différents états du composant */
 interface EmailRegisterState {
   submitted: boolean;
   email: string;
@@ -23,11 +24,26 @@ class EmailRegister extends Component<{}, EmailRegisterState> {
     };
   }
 
+  /* 
+    Redéfinis submitted à "false" si handleBack est appelé
+    On retourne dans ce composant
+  */
+  handleBack = () => {
+    this.setState({ submitted: false });
+  };
+
+  /* Vérifie si le formatage de l'e-mail est correct */
   validateEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i;
     return emailRegex.test(email);
   };
   
+  /* 
+    Gère la soumission du formulaire d'envoi OTP :
+    - Vérifie d'abord si l'email est valide.
+    - Envoie une requête POST à l'API pour envoyer l'OTP à l'email spécifié.
+    - Gère les réponses de l'API, met à jour l'état en conséquence et affiche une alerte en cas d'erreur.
+  */
   handleSubmit = async (email: string) => {
     if (!this.validateEmail(email)) {
       this.setState({ error: "Veuillez entrer une adresse e-mail valide." });
@@ -39,22 +55,21 @@ class EmailRegister extends Component<{}, EmailRegisterState> {
 
       this.setState({ submitted: true, email });
 
-      const response = await fetch('http://localhost:3000/otp/send-otp', {
-        method: 'POST',
-        headers: {
+      const response = await axios.post('http://localhost:3000/otp/send-otp', {
+        email, 
+        otp: code.join(''),
+      }, { headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email, otp: code.join('') }),
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
+      if (response.status !== 200) {
+        const errorData = await response.data;
         throw new Error(errorData.message || 'Failed to send OTP');
       }
 
-      const data = await response.json();
+      const data = await response.data;
       this.setState({ otp: data.otp });
-
       alert('OTP sent successfully');
     } catch (e: any) {
       console.error("Error sending OTP: ", e.message);
@@ -62,6 +77,11 @@ class EmailRegister extends Component<{}, EmailRegisterState> {
     }
   };
 
+  /* 
+    En fonction de l'état de submitted, l'un des deux composants est défini: 
+    - OtpInput si le mail est correctement rentrée et validé
+    - EmailInput, attend un mail valide en entrée
+  */
   render(): ReactNode {
     const { submitted, email, code, otp, error } = this.state;
     return (
@@ -69,7 +89,7 @@ class EmailRegister extends Component<{}, EmailRegisterState> {
         {!submitted ? (
           <EmailInput onSubmit={this.handleSubmit} error={error} />
         ) : (
-          <OtpInput refetchOtp={this.handleSubmit} email={email} code={code} otp={otp} />
+          <OtpInput refetchOtp={this.handleSubmit} email={email} code={code} otp={otp} onBack={this.handleBack}/>
         )}
       </div>
     );

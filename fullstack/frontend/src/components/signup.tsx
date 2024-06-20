@@ -16,16 +16,20 @@ import {
 import { IoIosArrowDown } from "react-icons/io";
 import { RiArrowGoBackLine } from "react-icons/ri";
 import Summary from "./summary";
+import axios from "axios";
 
 interface SignupState {
   first_name: string;
   last_name: string;
   phone: string;
   isUpdate: boolean;
+  errorMsg: string;
 }
 
 interface SignupProps {
   email: string;
+  id: string;
+  onBack: () => void;
 }
 
 class Signup extends Component<SignupProps, SignupState> {
@@ -36,51 +40,68 @@ class Signup extends Component<SignupProps, SignupState> {
       last_name: "",
       phone: "",
       isUpdate: false,
+      errorMsg: "",
     };
   }
+
+  handleErrorMsg = () => {
+    this.setState({ errorMsg: "Veuillez remplir le champ." });
+  }
+
   handleFirstname = (e: React.ChangeEvent<HTMLInputElement>) => {
     this.setState({ first_name: e.target.value });
   }
+  
   handleLastname = (e: React.ChangeEvent<HTMLInputElement>) => {
     this.setState({ last_name: e.target.value });
   }
+
   handlePhoneNumber = (e: React.ChangeEvent<HTMLInputElement>) => {
-      this.setState({ phone: e.target.value });
-    }
+    this.setState({ phone: e.target.value });
+  }
+
   updateUser = async (): Promise<void> => {
     const { first_name, last_name, phone } = this.state;
-    const { email } = this.props;
-    const newUserData = {
-      first_name: first_name,
-      last_name: last_name,
-      email: email,
-      phone: phone,
-    };
-    
+    const { email, id } = this.props;
+
+    if (first_name == "" || last_name == "" || phone == "" || email == "" || phone.length < 10) {
+      this.setState({ isUpdate: false });
+      this.handleErrorMsg();
+      throw new Error('All fields is required');
+    }
+
+    this.setState({ isUpdate: true });
+
     try {
-      const response = await fetch(`http://localhost:3000/users`, {
-        method: 'PATCH',
-        headers: {
+      const response = await axios.put(`http://localhost:3000/users/${id}`, {
+        first_name: first_name,
+        last_name: last_name,
+        email: email,
+        phone: phone,
+      }, { headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${localStorage.getItem('token')}`,
         },
-        body: JSON.stringify(newUserData),
       });
   
-      if (!response.ok) {
+      if (response.status !== 200) {
         throw new Error('Failed to fetch users');
       }
       
       this.setState({ isUpdate: true });
-      const data = await response.json();
-      console.log('Users:', data); // Utilisation des données reçues, par exemple
-  
     } catch (e: any) {
       console.error("Error: ", e.message);
     }
   }
   
-  signup = () => {
+  backtoUpdate = () => {
+    this.setState({ isUpdate: false });
+    this.setState({ first_name: ""});
+    this.setState({ last_name: ""});
+    this.setState({ phone: ""});
+  }
+
+  signup = (first: string, last: string, phone: string, error: string) => {
     return (
       <Box
         position={"relative"}
@@ -110,9 +131,14 @@ class Signup extends Component<SignupProps, SignupState> {
               pl={12}
               required
             />
-            <FormHelperText textColor={"#B3B3B3"} fontSize={"12px"}>
-              Votre nom complet
-            </FormHelperText>
+            <Box display={'flex'} alignItems={'center'} justifyContent={'space-between'}>
+              <FormHelperText textColor={"#B3B3B3"} fontSize={"12px"}>
+                Votre nom complet
+              </FormHelperText>
+              {!last && (
+                <Text textColor={"red"} fontSize={"12px"} mt={2}>{ error }</Text>
+              )}
+            </Box>
             <Spacer marginTop={6} />
             <FormLabel>Prénom</FormLabel>
             <Input
@@ -127,9 +153,14 @@ class Signup extends Component<SignupProps, SignupState> {
               pl={12}
               required
             />
-            <FormHelperText textColor={"#B3B3B3"} fontSize={"12px"}>
-              Votre prénom complet
-            </FormHelperText>
+            <Box display={'flex'} alignItems={'center'} justifyContent={'space-between'}>
+              <FormHelperText textColor={"#B3B3B3"} fontSize={"12px"}>
+                Votre prénom complet
+              </FormHelperText>
+              {!first && (
+                <Text textColor={"red"} fontSize={"12px"} mt={2}>{ error }</Text>
+              )}
+            </Box>
             <Spacer marginTop={6} />
             <FormLabel>Numéro de téléphone</FormLabel>
             <InputGroup alignSelf={"stretch"} mt={4}>
@@ -143,7 +174,7 @@ class Signup extends Component<SignupProps, SignupState> {
                 <Box height="70%" borderLeft="1px solid" borderColor="#B3B3B3" ml={2} />
               </InputLeftElement>
               <Input
-                type="email"
+                type="tel"
                 padding={"10px 16px"}
                 placeholder="07 87 34 22 12"
                 _placeholder={{ color: "#B3B3B3" }}
@@ -152,12 +183,19 @@ class Signup extends Component<SignupProps, SignupState> {
                 onChange={this.handlePhoneNumber}
                 borderColor={"black"}
                 pl={20}
+                maxLength={10}
+                minLength={10}
                 required
               />
             </InputGroup>
-            <FormHelperText textColor={"#B3B3B3"} fontSize={"12px"}>
-              Vous serez contacté via ce numéro.
-            </FormHelperText>
+            <Box display={'flex'} alignItems={'center'} justifyContent={'space-between'}>
+              <FormHelperText textColor={"#B3B3B3"} fontSize={"12px"}>
+                Vous serez contacté via ce numéro.
+              </FormHelperText>
+              {!phone && (
+                <Text textColor={"red"} fontSize={"12px"} mt={2}>{ error }</Text>
+              )}
+            </Box>
             <Spacer marginTop={10} />
             <Container display={"flex"} alignItems={"center"} justifyContent={"space-between"}>
               <Button
@@ -172,6 +210,7 @@ class Signup extends Component<SignupProps, SignupState> {
                   width: "93.3px",
                   height: "40px",
                 }}
+                onClick={this.props.onBack}
               >
                 <Box mr={2}>
                   <RiArrowGoBackLine size={16} />
@@ -201,10 +240,11 @@ class Signup extends Component<SignupProps, SignupState> {
     );
   }
   render(): ReactNode {
-    const { isUpdate } = this.state;
+    const { isUpdate, first_name, last_name, phone, errorMsg } = this.state;
+
     return(
       <>
-        {!isUpdate ? this.signup() : <Summary />}
+        {!isUpdate ? this.signup(first_name, last_name, phone, errorMsg) : <Summary backToUpdate={this.backtoUpdate} />}
       </>
     );
   }

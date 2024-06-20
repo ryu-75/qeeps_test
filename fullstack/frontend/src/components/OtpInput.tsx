@@ -1,32 +1,58 @@
 import { ChangeEvent, Component, ReactNode } from "react";
-import { AbsoluteCenter, Box, Button, Card, CardBody, Center, FormControl, FormHelperText, FormLabel, Grid, GridItem, HStack, Icon, IconButton, Image, Input, InputGroup, InputLeftElement, Spacer, Stack, Text, VStack } from "@chakra-ui/react";
+import { AbsoluteCenter, Box, Button, Card, CardBody, Center, Grid, GridItem, HStack, Icon, Image, Input, Spacer, Stack, Text, VStack } from "@chakra-ui/react";
 import { TbMailForward } from "react-icons/tb";
 import Signup from "./signup";
+import axios from "axios";
 
 interface SecurityCodeInputProps {
     refetchOtp: (email: string) => Promise<void>;
     email: string;
     code: string[];
     otp: string;
+    onBack: () => void;
 }
   
 interface SecurityCodeInputState {
   newCode: string[];
   isValidCode: boolean;
+  id: string;
 }
 
 class OtpInput extends Component<SecurityCodeInputProps, SecurityCodeInputState> {
-    constructor(props: SecurityCodeInputProps) {
-      super(props);
-      this.state = {
-        newCode: Array(5).fill(''),
-        isValidCode: false,
-      }
+  constructor(props: SecurityCodeInputProps) {
+    super(props);
+    this.state = {
+      newCode: Array(5).fill(''),
+      isValidCode: false,
+      id: "",
     }
-  
-  compareCodeContent = (newCode: string[], otp: string): boolean => {
-    let yourOtp = "";
+  }
 
+  getUserData = async () => {
+    try {
+      const response = await axios.get(`http://localhost:3000/users`, {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+      });
+  
+      if (response.status !== 200) {
+        throw new Error('Failed to fetch users');
+      }
+  
+      const data = await response.data;
+      this.setState({ id: data[0]._id });
+      
+    } catch (e: any) {
+      console.error("Error: ", e.message);
+    }
+  };
+
+  compareCodeContent = async (newCode: string[], otp: string): Promise<boolean> => {
+    await this.getUserData();
+    let yourOtp = "";
+    
     for (let i = 0; i < newCode.length; i++) yourOtp += newCode[i]; 
     if (yourOtp === otp) {
       this.setState({ isValidCode: true });
@@ -46,8 +72,8 @@ class OtpInput extends Component<SecurityCodeInputProps, SecurityCodeInputState>
 
   otpContent = (refetchOtp: (email:string) => Promise<void>, email: string, newCode: string[]) => {
     return (
-      <Box position={'relative'} display={'flex'} justifyContent={'center'} width={'100%'} ml={4}>
-        <VStack align={'start'} width={'100%'} maxW="500px" mx={'auto'}>
+      <Box position={'relative'} display={'flex'} justifyContent={'center'} width={'100vw'}>
+        <VStack align={'start'} width={'100%'} maxW="500px" m={4}>
           <Text
               fontSize={"20px"}
               lineHeight={"24px"}
@@ -151,7 +177,7 @@ class OtpInput extends Component<SecurityCodeInputProps, SecurityCodeInputState>
   }
 
   render(): ReactNode {
-    const { isValidCode, newCode } = this.state;
+    const { isValidCode, newCode, id } = this.state;
     const { email, refetchOtp, code, otp } = this.props;
     
     return (
@@ -187,7 +213,7 @@ class OtpInput extends Component<SecurityCodeInputProps, SecurityCodeInputState>
           </Box>
         </GridItem>
         <GridItem area={'main'}>
-          {!isValidCode ? this.otpContent(refetchOtp, email, newCode) : <Signup email={email} />}
+          {!isValidCode ? this.otpContent(refetchOtp, email, newCode) : <Signup email={email} id={id} onBack={this.props.onBack} />}
         </GridItem>
         {!isValidCode && (
           <GridItem area={'footer'}>

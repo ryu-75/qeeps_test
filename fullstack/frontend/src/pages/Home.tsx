@@ -3,17 +3,23 @@ import React, { Component, ReactNode } from "react";
 import { useNavigate, NavigateFunction } from "react-router-dom";
 import "../assets/home.css";
 import { UserBase } from "../stores/api/users/users";
-import { PiNuclearPlantLight } from "react-icons/pi";
+import axios from "axios";
 
+/* 
+   Wrapper pour le composant Home.
+   Permet de séparer la logique de navigation du composant principal App.tsx.
+*/
 const HomeWrapper: React.FC = () => {
     const navigate = useNavigate();
     return <Home navigate={navigate} />;
 };
 
+/* Navigate définis pour rediriger vers Register.tsx */
 interface HomeProps {
   navigate: NavigateFunction;
 }
 
+/* Définition de l'état globale du composant */
 interface HomeState {
   redirection: string | null;
   isError: boolean;
@@ -32,7 +38,11 @@ class Home extends Component<HomeProps, HomeState> {
     };
   }
 
-
+  /* 
+    Crée un utilisateur en appelant l'API.
+    Initialise une entrée dans la base de données "User" avec les informations fournies.
+    Définit le statut du client en fonction de la redirection sélectionnée.
+  */
   createUser = async (): Promise<void> => {
     const { redirection } = this.state;
 
@@ -41,31 +51,24 @@ class Home extends Component<HomeProps, HomeState> {
       return;
     }
 
-    const newUser: Partial<UserBase> = {
-      first_name: "",
-      last_name: "",
-      email: "",
-      phone: "",
-      status: redirection,
-    };
-
     try {
-      const response = await fetch(`http://localhost:3000/users`, {
-        method: 'POST',
-        headers: {
+      const response = await axios.post(`http://localhost:3000/users`, {
+        first_name: "",
+        last_name: "",
+        email: "",
+        phone: "",
+        status: redirection,
+      }, { headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${localStorage.getItem('token')}`,
         },
-        body: JSON.stringify(newUser),
       });
-      console.log(response);
 
-      if (!response.ok) {
+      if (response.status !== 200) {
         throw new Error('Network response was not ok');
       }
 
-      const createdUser: UserBase = await response.json();
-      console.log('Created user:', createdUser);
+      const createdUser: UserBase = await response.data;
 
       this.setState(prevState => ({
         data: prevState.data ? [...prevState.data, createdUser] : [createdUser],
@@ -77,10 +80,12 @@ class Home extends Component<HomeProps, HomeState> {
     }
   };
 
+  /* Initialise l'état de redirection en fonction de la carte qui a été sélectionnée */
   handleCardClick = (cardType: string): void => {
     this.setState({ redirection: cardType });
   };
 
+  /* Effectue la redirection vers Register.tsx en spécifiant le type dans l'URL après création de l'utilisateur */
   handleButtonClick = (): void => {
     const { redirection } = this.state;
     const { navigate } = this.props;
@@ -235,5 +240,4 @@ class Home extends Component<HomeProps, HomeState> {
   }
 }
 
-// Exportation du composant avec le wrapper pour la navigation
 export default HomeWrapper;

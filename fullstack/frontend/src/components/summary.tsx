@@ -4,25 +4,66 @@ import {
   Button,
   Card,
   CardBody,
-  Center,
-  Circle,
-  Container,
-  FormControl,
-  FormHelperText,
-  FormLabel,
-  HStack,
   Image,
-  Input,
-  InputGroup,
-  InputLeftElement,
   Spacer,
   Stack,
   Text,
   VStack,
 } from "@chakra-ui/react";
+import axios from "axios";
 
-class Summary extends Component {
+interface SummaryProps {
+  backToUpdate: () => void;
+}
+
+interface SummaryState {
+  first_name: string;
+  last_name: string;
+  email: string;
+  phone: string;
+  status: 'agent' | 'candidat';
+}
+
+class Summary extends Component<SummaryProps, SummaryState>{
+  constructor(props: SummaryProps) {
+    super(props);
+    this.state = {
+      first_name: "",
+      last_name: "",
+      email: "",
+      phone: "",
+      status: 'agent',
+    };
+  }
+
+  componentDidMount() {
+    this.getUserData();
+  }
+
+  getUserData = async (): Promise<void> => {
+    try {
+      const response = await axios.get(`http://localhost:3000/users`, {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+      });
+      if (response.status !== 200) throw new Error('Failed to fetch users data');
+      const data = await response.data;
+      const user = data[0];
+      this.setState({
+        first_name: user.first_name,
+        last_name: user.last_name,
+        email: user.email,
+        phone: user.phone,
+        status: user.status,
+      })
+    } catch (e: any) {
+      console.log("Error: ", e.message);
+    }
+  }
     render(): ReactNode {
+      const { first_name, last_name, email, phone, status } = this.state;
         return (
             <Box
               position={"relative"}
@@ -30,9 +71,9 @@ class Summary extends Component {
               justifyContent={"center"}
               m={4}
             >
-              <VStack align={"start"} width={"100%"} maxW="500px">
+              <VStack align={"start"} width={"100%"} maxW="500px" m={4}>
                 <Text fontSize={"20px"} lineHeight={"24px"} fontWeight={600}>
-                  Bonjour Pierre,
+                  Bonjour { first_name },
                 </Text>
                 <Spacer marginTop={2} />
                 <Box height="0px" width="348px" border="1px solid" borderColor="rgba(128, 128, 128, 0.1)" />
@@ -56,7 +97,7 @@ class Summary extends Component {
                               lineHeight: "19px",
                             }}
                           >
-                          Pierre Durant
+                          { first_name } { last_name }
                           </Text>
                           <Button
                             sx={{
@@ -65,6 +106,7 @@ class Summary extends Component {
                               border: "1px solid #F2F2F2",
                               background: "white"
                             }}
+                            onClick={this.props.backToUpdate}
                           >
                             <Image src={'/pen.png'} width={5} />
                           </Button>
@@ -87,7 +129,7 @@ class Summary extends Component {
                               }}
                             >
                               <Image src="/book.png" width={4} mr={3}/>
-                              AGENT
+                              { status }
                             </Text>
                           </Box>
                         </VStack>
@@ -114,7 +156,7 @@ class Summary extends Component {
                               fontWeight={600}
                               color={"#073906"}
                             >
-                              06 73 78 44 65
+                              { phone }
                             </Text>
                           </Box>
                           <Spacer marginTop={6} />
@@ -139,7 +181,7 @@ class Summary extends Component {
                               fontWeight={600}
                               color={"#073906"}
                             >
-                              pa.durip@gmail.com
+                              { email }
                             </Text>
                           </Box>
                         </VStack>

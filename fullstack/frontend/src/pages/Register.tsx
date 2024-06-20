@@ -1,40 +1,35 @@
 import { AbsoluteCenter, Box, Button, Center, Grid, GridItem, Image, Text } from "@chakra-ui/react";
-import React, { Component, ReactNode } from "react";
+import { Component, ReactNode } from "react";
 import { NavigateFunction, useNavigate, useParams } from "react-router-dom";
 
-// Composant fonctionnel pour obtenir les paramètres et les passer au composant de classe
+/* 
+  Wrapper qui récupère le type de registre depuis les paramètres d'URL 
+  et rend le composant correspondant.
+*/
 const RegisterWrapper = () => {
   const { type } = useParams<{type: string}>();
   const navigate = useNavigate();
   return <Register type={type!} navigate={navigate} />;
 };
 
-// Définition des types pour les props
+/* 
+  - Gère la sélection du type d'utilisateur ('agent' | 'candidat').
+  - Affiche le contenu correspondant en fonction du type sélectionné.
+  - Permet la navigation vers EmailRegister.tsx une fois le bouton cliqué.
+*/
 interface RegisterProps {
     navigate: NavigateFunction;
     type: string;
 }
 
-interface RegisterState {
-    redirection: string | null;
-}
+class Register extends Component<RegisterProps> {
+  /* Redirige vers EmailRegister.tsx */
+  handleButtonClick = (): void => {
+      const { navigate, type } = this.props;
+      navigate(`/register/${type}/email`);
+  };
 
-class Register extends Component<RegisterProps, RegisterState> {
-    constructor(props: RegisterProps) {
-        super(props);
-        this.state = {
-          redirection: null,
-        };
-    }
-
-    handleCardClick = (cardType: string): void => {
-        this.setState({ redirection: cardType });
-    };
-
-    handleButtonClick = (): void => {
-        const { navigate, type } = this.props;
-        navigate(`/register/${type}/email`);
-    };
+  /* Retourne le composant correspondant au type de client */
   isAgentOrCandidat(): ReactNode {
     const { type } = this.props;
 
@@ -84,7 +79,6 @@ class Register extends Component<RegisterProps, RegisterState> {
   }
 
   render(): ReactNode {
-    const { redirection } = this.state;
     return (
       <Grid
         templateAreas={`"main main"
@@ -127,7 +121,6 @@ class Register extends Component<RegisterProps, RegisterState> {
                   fontFamily: "'Poppins', sans-serif"
                 }}
                 onClick={this.handleButtonClick}
-                disabled={!redirection}
               >
                 Connexion rapide
               </Button>
@@ -139,5 +132,4 @@ class Register extends Component<RegisterProps, RegisterState> {
   }
 }
 
-// Exportation du composant avec le wrapper pour les paramètres
 export default RegisterWrapper;
