@@ -3,7 +3,13 @@ import EmailInput from "../components/EmailInput";
 import OtpInput from "../components/OtpInput";
 import axios from "axios";
 
-/* Définition des différents états du composant */
+/*
+  - submitted: Indique si le formulaire a été soumis.
+  - email: Représente l'e-mail saisi par le client.
+  - code: Représente le nouveau code OTP saisi par le client.
+  - otp: Représente le code OTP saisi par le client.
+  - error: Représente le message d'erreur à afficher.
+*/
 interface EmailRegisterState {
   submitted: boolean;
   email: string;
@@ -12,8 +18,8 @@ interface EmailRegisterState {
   error: string;
 }
 
-class EmailRegister extends Component<{}, EmailRegisterState> {
-  constructor(props: {}) {
+class EmailRegister extends Component<Record<string, never>, EmailRegisterState> {
+  constructor(props: Record<string, never>) {
     super(props);
     this.state = {
       submitted: false,
@@ -26,7 +32,7 @@ class EmailRegister extends Component<{}, EmailRegisterState> {
 
   /* 
     Redéfinis submitted à "false" si handleBack est appelé
-    On retourne dans ce composant
+    On retourne ce composant
   */
   handleBack = () => {
     this.setState({ submitted: false });
@@ -71,8 +77,8 @@ class EmailRegister extends Component<{}, EmailRegisterState> {
       const data = await response.data;
       this.setState({ otp: data.otp });
       alert('OTP sent successfully');
-    } catch (e: any) {
-      console.error("Error sending OTP: ", e.message);
+    } catch (e: unknown) {
+      if (e instanceof Error) console.error("Error sending OTP: ", e.message);
       alert("Failed to send OTP. Please try again.");
     }
   };

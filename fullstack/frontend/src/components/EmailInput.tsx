@@ -1,12 +1,16 @@
 import { AbsoluteCenter, Box, Button, Card, CardBody, Center, FormControl, FormHelperText, FormLabel, Grid, GridItem, Image, Input, InputGroup, InputLeftElement, Spacer, Stack, Text, VStack } from "@chakra-ui/react";
 import React, { Component, ReactNode } from "react";
 
-/*  */
+/*
+  - onSubmit: Appel handleSubmit présent dans EmailRegister.tsx
+  - error: Récupère l'erreur définis dans EmailRegister.tsx
+*/
 interface EmailFormProps {
   onSubmit: (email: string) => Promise<void>;
   error: string;
 }
-  
+
+/* email: Définis l'état de email une fois validé */
 interface EmailFormState {
   email: string;
 }
@@ -19,6 +23,7 @@ class EmailInput extends Component<EmailFormProps, EmailFormState> {
       };
     }
   
+    /* Initialise email une fois celle-ci définis et correct */
     handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
       this.setState({ email: event.target.value });
     };

@@ -15,9 +15,16 @@ import {
 } from "@chakra-ui/react";
 import { IoIosArrowDown } from "react-icons/io";
 import { RiArrowGoBackLine } from "react-icons/ri";
-import Summary from "./summary";
+import Summary from "./Summary";
 import axios from "axios";
 
+/* 
+  - first_name: Prénom saisi par l'utilisateur.
+  - last_name: Nom saisi par l'utilisateur.
+  - phone: Numéro de téléphone saisi par l'utilisateur.
+  - isUpdate: Indique si les informations ont été correctement mises à jour.
+  - errorMsg: Message d'erreur à afficher en cas de problème.
+*/
 interface SignupState {
   first_name: string;
   last_name: string;
@@ -26,6 +33,11 @@ interface SignupState {
   errorMsg: string;
 }
 
+/* 
+  - email: Email du client récupéré à partir d'un autre composant.
+  - id: ID du client récupéré à partir d'un autre composant.
+  - onBack: Fonction appelée lorsque le client souhaite revenir à l'étape précédente.
+*/
 interface SignupProps {
   email: string;
   id: string;
@@ -44,26 +56,33 @@ class Signup extends Component<SignupProps, SignupState> {
     };
   }
 
+
+  // Affiche un message d'erreur lorsque les champs obligatoires ne sont pas remplis.
   handleErrorMsg = () => {
     this.setState({ errorMsg: "Veuillez remplir le champ." });
   }
 
+  // Met à jour l'état avec le prénom saisi par le client.
   handleFirstname = (e: React.ChangeEvent<HTMLInputElement>) => {
     this.setState({ first_name: e.target.value });
   }
   
+  // Met à jour l'état avec le nom de famille saisi par le client.
   handleLastname = (e: React.ChangeEvent<HTMLInputElement>) => {
     this.setState({ last_name: e.target.value });
   }
 
+  // Met à jour l'état avec le numéro de téléphone saisi par le client
   handlePhoneNumber = (e: React.ChangeEvent<HTMLInputElement>) => {
     this.setState({ phone: e.target.value });
   }
 
+  // Met à jour les données du client sur le serveur si les données saisies sont correctes.
   updateUser = async (): Promise<void> => {
     const { first_name, last_name, phone } = this.state;
     const { email, id } = this.props;
 
+    // Vérfie bien que tous les champs ont étaient remplis et sont valides
     if (first_name == "" || last_name == "" || phone == "" || email == "" || phone.length < 10) {
       this.setState({ isUpdate: false });
       this.handleErrorMsg();
@@ -89,11 +108,12 @@ class Signup extends Component<SignupProps, SignupState> {
       }
       
       this.setState({ isUpdate: true });
-    } catch (e: any) {
-      console.error("Error: ", e.message);
+    } catch (e: unknown) {
+      if (e instanceof Error) console.error("Error: ", e.message);
     }
   }
   
+  /* Est appelé dans Summary.tsx si le client souhaite apporter des modifications */
   backtoUpdate = () => {
     this.setState({ isUpdate: false });
     this.setState({ first_name: ""});
@@ -101,6 +121,7 @@ class Signup extends Component<SignupProps, SignupState> {
     this.setState({ phone: ""});
   }
 
+  /* Génère le contenu de signup */
   signup = (first: string, last: string, phone: string, error: string) => {
     return (
       <Box

@@ -10,6 +10,7 @@ export class UserController {
     this.service = new UserService();
   }
 
+  // Récupère les données de tous les utilisateurs
   async getUsers(req: Request, res: Response) {
     try {
       const users = await this.service.getUsers();
@@ -19,6 +20,7 @@ export class UserController {
     }
   };
 
+  // Crée un nouvel utilisateur
   async createUserController(req: Request, res: Response) {
     const { first_name, last_name, email, phone, status } = req.body;
 
@@ -30,6 +32,7 @@ export class UserController {
     }
   }
 
+  // Met à jour les données d'un utilisateur existant à partir de son ID
   async updateUserController(req: Request, res: Response) {
     try {
       const { id } = req.params;

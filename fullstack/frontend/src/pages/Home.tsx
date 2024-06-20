@@ -74,9 +74,11 @@ class Home extends Component<HomeProps, HomeState> {
         data: prevState.data ? [...prevState.data, createdUser] : [createdUser],
       }));
       console.log('Updata data: ', this.state.data);
-    } catch (error: any) {
-      console.error('Error creating user:', error);
-      this.setState({ isError: true, error: error.toString() });
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        console.error('Error creating user:', error);
+        this.setState({ isError: true, error: error.toString() });
+      }
     }
   };
 

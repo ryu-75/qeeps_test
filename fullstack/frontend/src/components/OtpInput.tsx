@@ -1,33 +1,46 @@
 import { ChangeEvent, Component, ReactNode } from "react";
 import { AbsoluteCenter, Box, Button, Card, CardBody, Center, Grid, GridItem, HStack, Icon, Image, Input, Spacer, Stack, Text, VStack } from "@chakra-ui/react";
 import { TbMailForward } from "react-icons/tb";
-import Signup from "./signup";
+import Signup from "./Signup";
 import axios from "axios";
 
-interface SecurityCodeInputProps {
+/* 
+  - refetchOtp: Effectue un nouvel appel vers l'API et récupère un nouveau code OTP.
+  - email: Adresse email de l'utilisateur.
+  - code: Code OTP envoyé à l'utilisateur, sous forme de tableau de caractères.
+  - otp: Code OTP complet sous forme de chaîne de caractères.
+  - onBack: Permet de revenir à l'écran précédent.
+*/
+interface OtpInputProps {
     refetchOtp: (email: string) => Promise<void>;
     email: string;
     code: string[];
     otp: string;
     onBack: () => void;
 }
-  
-interface SecurityCodeInputState {
+
+/* 
+  - newCode: Représente le nouveau code OTP saisi par le client.
+  - isValidCode: Indique si le code saisi est valide.
+  - id: Récupéré depuis l'API
+*/
+interface OtpInputState {
   newCode: string[];
   isValidCode: boolean;
   id: string;
 }
 
-class OtpInput extends Component<SecurityCodeInputProps, SecurityCodeInputState> {
-  constructor(props: SecurityCodeInputProps) {
+class OtpInput extends Component<OtpInputProps, OtpInputState> {
+  constructor(props: OtpInputProps) {
     super(props);
     this.state = {
-      newCode: Array(5).fill(''),
+      newCode: Array(5).fill(''), // Initialise un nouveau tableau de 5 chaînes
       isValidCode: false,
       id: "",
     }
   }
 
+  /* Récupère les données du client depuis l'API */
   getUserData = async () => {
     try {
       const response = await axios.get(`http://localhost:3000/users`, {
@@ -43,12 +56,12 @@ class OtpInput extends Component<SecurityCodeInputProps, SecurityCodeInputState>
   
       const data = await response.data;
       this.setState({ id: data[0]._id });
-      
-    } catch (e: any) {
-      console.error("Error: ", e.message);
+    } catch (e: unknown) {
+      if (e instanceof Error) console.error("Error: ", e.message);
     }
   };
 
+  /* Compare le code saisi par le client avec le code OTP reçu */
   compareCodeContent = async (newCode: string[], otp: string): Promise<boolean> => {
     await this.getUserData();
     let yourOtp = "";
@@ -62,6 +75,7 @@ class OtpInput extends Component<SecurityCodeInputProps, SecurityCodeInputState>
     return false;
   }
 
+  /* Gère le changement de valeur dans les champs de saisie de l'OTP */
   handleChange = (index: number) => (event: ChangeEvent<HTMLInputElement>) => {
     const { value } = event.target;
     const { newCode } = this.state;
@@ -70,6 +84,7 @@ class OtpInput extends Component<SecurityCodeInputProps, SecurityCodeInputState>
     this.setState({ newCode: isNewCode });
   };
 
+  /* Génère le contenu du composant de l'OTP */
   otpContent = (refetchOtp: (email:string) => Promise<void>, email: string, newCode: string[]) => {
     return (
       <Box position={'relative'} display={'flex'} justifyContent={'center'} width={'100vw'}>
@@ -238,7 +253,7 @@ class OtpInput extends Component<SecurityCodeInputProps, SecurityCodeInputState>
           </GridItem>)}
       </Grid>
     );
-  };
+  }
 }
 
 export default OtpInput;

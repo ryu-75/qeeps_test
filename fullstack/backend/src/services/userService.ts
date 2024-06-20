@@ -7,6 +7,7 @@ export class UserService {
     this.model = UserModel;
   }
 
+  // Récupère tous les utilisateurs
   async getUsers() {
     try {
       const users = await this.model.find();
@@ -16,6 +17,7 @@ export class UserService {
     }
   }
 
+  // Crée un nouvel utilisateur et le sauvegarde dans la base de donnée
   async createUser(first_name: string, last_name: string, phone: string, email: string, status: 'agent' | 'candidat') {
     try {
       const newUser = new this.model({ first_name, last_name, phone, email, status });
@@ -26,6 +28,7 @@ export class UserService {
     }
   }
 
+  // Met à jour un utilisateur existant par son ID
   async updateUser(_id: string, updateData: { first_name: string, last_name: string, phone: string, email: string }) {
     try {
       const updateUser = await this.model.findByIdAndUpdate(_id, updateData, {

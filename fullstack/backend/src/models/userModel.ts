@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 
+// Définit la structure du document OTP
 export interface IUser extends mongoose.Document {
   first_name: string;
   last_name: string;
@@ -8,6 +9,7 @@ export interface IUser extends mongoose.Document {
   email: string;
 }
 
+// Schéma pour le modèle User
 const userSchema: mongoose.Schema<IUser> = new mongoose.Schema(
   {
     first_name: {
