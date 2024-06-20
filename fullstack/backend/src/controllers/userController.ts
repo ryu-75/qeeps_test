@@ -32,10 +32,10 @@ export class UserController {
 
   async updateUserController(req: Request, res: Response) {
     try {
-      const { _id } = req.params;
+      const { id } = req.params;
       const { first_name, last_name, email, phone } = req.body;
 
-      const updatedUser = await this.service.updateUser(_id, { first_name, last_name, email, phone });
+      const updatedUser = await this.service.updateUser(id, { first_name, last_name, email, phone });
       res.json(updatedUser);
     } catch (e: any) {
       res.status(500).json({ error: `Failed to update user: ${e.message}` });

@@ -26,9 +26,9 @@ export class UserService {
     }
   }
 
-  async updateUser(_id : string, updateData: { first_name: string, last_name: string, phone: string, email: string }) {
+  async updateUser(_id: string, updateData: { first_name: string, last_name: string, phone: string, email: string }) {
     try {
-      const updateUser = await this.model.findById(_id, updateData, {
+      const updateUser = await this.model.findByIdAndUpdate(_id, updateData, {
         new: true,
         runValidators: true,
       });
