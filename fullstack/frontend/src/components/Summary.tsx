@@ -136,7 +136,7 @@ class Summary extends Component<SummaryProps, SummaryState>{
                         }}
                       >
                         <Image src="/book.png" width={4} mr={3}/>
-                        { status }
+                        { status.toUpperCase() }
                       </Text>
                     </Box>
                   </VStack>

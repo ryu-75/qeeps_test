@@ -63,11 +63,11 @@ class OtpInput extends Component<OtpInputProps, OtpInputState> {
 
   /* Compare le code saisi par le client avec le code OTP reçu */
   compareCodeContent = async (newCode: string[], otp: string): Promise<boolean> => {
-    await this.getUserData();
     let yourOtp = "";
     
     for (let i = 0; i < newCode.length; i++) yourOtp += newCode[i]; 
     if (yourOtp === otp) {
+      await this.getUserData();
       this.setState({ isValidCode: true });
       return true;
     }
